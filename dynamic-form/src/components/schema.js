@@ -9,8 +9,15 @@ export const schema = yup.object().shape({
     email: yup.string().email("**Please enter a valid email").required("**This field is required"),
     gender: yup.string().oneOf(['Male', 'Female', 'Others']).required("**This field is required"),
     employment: yup.string().oneOf(['Full-Time', 'Part-Time']).required("**This field is required"),
-    contact: yup.string().required("**This field is required").matches(phoneRegex, {message: "**Contact should contain 10 digits and start with 6/7/8/9"}),
-    license_expiry: yup.date().required("**This field is required").min(new Date(Date.now()), "**Expiry date should be in future"),
-    identity: yup.string().required("**This field is required").matches(identityRegex, {message: "Only 9 numbers allowed"}),
+    contact: yup.string().required("**This field is required").matches(phoneRegex, { message: "**Contact should contain 10 digits and start with 6/7/8/9" }),
+    driving_license: yup.string(),
+    license_expiry: yup.date().when("driving_license", {
+        is: "true",
+        then: yup.date().required("**This field is required").min(new Date(Date.now()), "**Expiry date should be in future")
+    }),
+    identity: yup.string().when("driving_license", {
+        is: "true",
+        then: yup.string().required("**This field is required").matches(identityRegex, { message: "Only 9 numbers allowed" })
+    }),
     agreement: yup.string().required("**Please accept the agreement to continue.")
 })

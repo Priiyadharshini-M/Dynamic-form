@@ -26,11 +26,25 @@ export const Form = () => {
             [item.name]: item.value
         }
     }
-    const onSubmit = () => {
-        console.log("before submit", element)
+    const onSubmit = async () => {
+        console.log("before submit", values)
+        await fetch(`http://localhost:8000/user/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values) })
+            .then((response) => {
+                if (response.ok) {
+                    alert("Successfully applied")
+                    return response.json()
+                }
+                return Promise.reject(response)
+            })
+            .catch(err => {
+                console.log("error from back end", err)
+                err.json().then((error) => {
+                    alert(error.err)
+                })
+            })
     }
 
-    const { values, errors, touched, handleChange, handleSubmit, handleBlur, isSubmitting } = useFormik({
+    const { values, errors, touched, handleChange, handleSubmit, handleBlur } = useFormik({
         initialValues: newObj,
         validationSchema: schema,
         onSubmit
@@ -51,6 +65,7 @@ export const Form = () => {
             <form onSubmit={handleSubmit}>
                 {fields && fields.map((field, i) => {
                     const fieldError = field.name
+                    const testingError = field.name + "_Error"
                     switch (field.type) {
                         case 'text':
                             return (
@@ -61,9 +76,9 @@ export const Form = () => {
                                             <label className="form-label text-align-center">{field.label} <sup className="text-danger">{field.star}</sup></label>
                                             <div id={styles.iconsContainer}>
                                                 {field.icon && <i className={field.icon} id={styles.icons}></i>}
-                                                <input className="form-control" {...field} value={field.val} onChange={handleChange} onBlur={handleBlur}></input>
+                                                <input className="form-control" {...field} value={field.val} data-testid={field.id} onChange={handleChange} onBlur={handleBlur}></input>
                                             </div>
-                                            {errors[fieldError] && touched[fieldError] && <p className="text-danger">{errors[fieldError]}</p>}
+                                            {errors[fieldError] && touched[fieldError] && <p className="text-danger" data-testid={testingError}>{errors[fieldError]}</p>}
                                         </div>
                                     </Condition>
                                 </div>
@@ -74,7 +89,7 @@ export const Form = () => {
                                 <div key={i}>
                                     <Condition when={field.condition ? field.condition : null} is={true} value={values}>
                                         <label className="form-label">{field.label} <sup className="text-danger">{field.star}</sup></label>
-                                        <select className="form-select" {...field} value={field.val} onChange={handleChange} onBlur={handleBlur}>
+                                        <select className="form-select" {...field} value={field.val} data-testid={field.id} onChange={handleChange} onBlur={handleBlur}>
                                             <option defaultValue>Select menu</option>
                                             {field.field_options.length > 0 && field.field_options.map((option, i) => {
                                                 return (
@@ -82,7 +97,7 @@ export const Form = () => {
                                                 )
                                             })}
                                         </select>
-                                        {errors[fieldError] && touched[fieldError] && <p className="text-danger">{errors[fieldError]}</p>}
+                                        {errors[fieldError] && touched[fieldError] && <p className="text-danger" data-testid={testingError}>{errors[fieldError]}</p>}
                                         <br />
                                     </Condition>
                                 </div>
@@ -93,17 +108,17 @@ export const Form = () => {
                                 <div key={i}>
                                     <Condition when={field.condition ? field.condition : null} is={true} value={values}>
                                         <label className="form-label">{field.label} <sup className="text-danger">{field.star}</sup></label>
-                                        <div className="form-check radioGroup" {...field} value={field.val} onChange={handleChange} onBlur={handleBlur}>
+                                        <div className="form-check radioGroup" {...field} value={field.val} data-testid={field.id} onChange={handleChange} onBlur={handleBlur}>
                                             {field.field_options.length > 0 && field.field_options.map((option, i) => {
                                                 return (
                                                     <div key={i}>
-                                                        <input className="form-check-input" {...field} value={option.option_label} />
+                                                        <input className="form-check-input" {...field} value={option.option_label} data-testid={option.option_label} onChange={handleChange} onBlur={handleBlur}/>
                                                         <label className="form-check-label">{option.option_label}</label>
                                                     </div>
                                                 )
                                             })}
                                         </div>
-                                        {errors[fieldError] && touched[fieldError] && <p className="text-danger">{errors[fieldError]}</p>}<br />
+                                        {errors[fieldError] && touched[fieldError] && <p className="text-danger" data-testid={testingError}>{errors[fieldError]}</p>}<br />
                                     </Condition>
                                 </div>
                             )
@@ -114,9 +129,9 @@ export const Form = () => {
                                 <div key={i}>
                                     <Condition when={field.condition ? field.condition : null} is={true} value={values}>
                                         <div className="mb-3 form-check">
-                                            <input className="form-check-input" {...field} checked={field.val} onChange={handleChange} />
+                                            <input className="form-check-input" {...field} checked={field.val} data-testid={field.id} onChange={handleChange} />
                                             <label className="form-check-label">{field.label}</label>
-                                            {errors[fieldError] && touched[fieldError] && <p className="text-danger">{errors[fieldError]}</p>}
+                                            {errors[fieldError] && touched[fieldError] && <p className="text-danger" data-testid={testingError}>{errors[fieldError]}</p>}
                                         </div>
                                     </Condition>
                                 </div>
@@ -128,8 +143,8 @@ export const Form = () => {
                                     <Condition when={field.condition ? field.condition : null} is={true} value={values}>
                                         <div className="mb-3">
                                             <label className="form-label">{field.label} <sup className="text-danger">{field.star}</sup></label>
-                                            <input className="form-control" {...field} value={field.val} onChange={handleChange} onBlur={handleBlur} />
-                                            {errors[fieldError] && touched[fieldError] && <p className="text-danger">{errors[fieldError]}</p>}
+                                            <input className="form-control" {...field} value={field.val} data-testid={field.id} onChange={handleChange} onBlur={handleBlur} />
+                                            {errors[fieldError] && touched[fieldError] && <p className="text-danger" data-testid={testingError}>{errors[fieldError]}</p>}
                                         </div>
                                     </Condition>
                                 </div>
@@ -138,9 +153,9 @@ export const Form = () => {
                         case 'switch':
                             return (
                                 <div className="form-check form-switch" key={i}>
-                                    <input className="form-check-input"  {...field} type="checkbox" onChange={handleChange} onBlur={handleBlur}/>
+                                    <input className="form-check-input"  {...field} type="checkbox" data-testid={field.id} onChange={handleChange} onBlur={handleBlur} />
                                     <label className="form-check-label" >{field.label}</label>
-                                    {errors[fieldError] && touched[fieldError] && <p className="text-danger">{errors[fieldError]}</p>}
+                                    {errors[fieldError] && touched[fieldError] && <p className="text-danger" data-testid={testingError}>{errors[fieldError]}</p>}
                                 </div>
                             )
 
@@ -149,9 +164,9 @@ export const Form = () => {
                                 <div key={i}>
                                     <Condition when={field.condition ? field.condition : null} is={true} value={values}>
                                         <div className="form-floating">
-                                            <textarea className="form-control" {...field} value={field.val} onChange={handleChange} onBlur={handleBlur}></textarea>
+                                            <textarea className="form-control" {...field} value={field.val} data-testid={field.id} onChange={handleChange} onBlur={handleBlur}></textarea>
                                             <label>{field.label}</label>
-                                            {errors[fieldError] && touched[fieldError] && <p className="text-danger">{errors[fieldError]}</p>}
+                                            {errors[fieldError] && touched[fieldError] && <p className="text-danger" data-testid={testingError}>{errors[fieldError]}</p>}
                                         </div><br />
                                     </Condition>
                                 </div>
@@ -162,7 +177,7 @@ export const Form = () => {
                     }
                 })}
 
-                <button disabled={isSubmitting} type="submit" className="btn btn-success">Submit</button>
+                <button type="submit" className="btn btn-success">Submit</button>
             </form>
         </div>
     )
