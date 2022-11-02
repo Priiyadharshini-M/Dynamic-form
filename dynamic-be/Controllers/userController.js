@@ -2,7 +2,6 @@ const User = require('../Models/userModel')
 const { validation } = require('../Validation/validation')
 
 const registerUser = async(req, res) => {
-    console.log("req body", req.body)
     let user
     try{
         const result = await validation.validateAsync(req.body, {abortEarly: false})

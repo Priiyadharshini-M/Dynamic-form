@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
-import { formElement } from '../formElement'
-import styles from '../components/Form.module.css'
 import { useFormik } from "formik"
+import { toast } from 'react-toastify';
+import { formElement } from '../formElement'
 import { schema } from "./schema"
+import styles from '../components/Form.module.css'
 
 const Condition = ({ when, is, value, children }) => {
     var array = []
@@ -27,19 +28,17 @@ export const Form = () => {
         }
     }
     const onSubmit = async () => {
-        console.log("before submit", values)
         await fetch(`http://localhost:8000/user/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values) })
             .then((response) => {
                 if (response.ok) {
-                    alert("Successfully applied")
+                    toast.success("Successfully applied")
                     return response.json()
                 }
                 return Promise.reject(response)
             })
             .catch(err => {
-                console.log("error from back end", err)
                 err.json().then((error) => {
-                    alert(error.err)
+                    toast.warning(error.err)
                 })
             })
     }
@@ -50,9 +49,6 @@ export const Form = () => {
         onSubmit
     })
 
-    console.log("errors", values)
-    console.log("er", errors)
-
     useEffect(() => {
         setElement(formElement[0])
     }, [])
@@ -61,7 +57,7 @@ export const Form = () => {
 
     return (
         <div className="container justify-content-center text-align-center" id={styles.container}>
-            <h3>{page_label}</h3>
+            <h3 className="ml-4">{page_label}</h3><hr />
             <form onSubmit={handleSubmit}>
                 {fields && fields.map((field, i) => {
                     const fieldError = field.name
@@ -71,7 +67,6 @@ export const Form = () => {
                             return (
                                 <div key={i}>
                                     <Condition when={field.condition ? field.condition : null} is={true} value={values}>
-                                        {console.log("val", fieldError)}
                                         <div className="mb-3" key={i}>
                                             <label className="form-label text-align-center">{field.label} <sup className="text-danger">{field.star}</sup></label>
                                             <div id={styles.iconsContainer}>
@@ -177,7 +172,7 @@ export const Form = () => {
                     }
                 })}
 
-                <button type="submit" className="btn btn-success">Submit</button>
+                <br /><button type="submit" className="btn btn-success" id={styles.submit}>Submit</button>
             </form>
         </div>
     )
